@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>数据列表</title>
+</head>
+<body>
+    <h1>数据列表</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>代码</th>
+                <th>记录日期</th>
+                <th>开盘价</th>
+                <th>最低价</th>
+                <th>最高价</th>
+                <th>收盘价</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 遍历每一页中的每个股票数据 -->
+            {% for symbol in page_obj %}
+                <tr>
+                    <td>{{ symbol.symbol }}</td>
+                    <td>{{ symbol.datatime }}</td>
+                    <td>{{ symbol.OPrice }}</td>
+                    <td>{{ symbol.LPrice }}</td>
+                    <td>{{ symbol.HPrice }}</td>
+                    <td>{{ symbol.CPrice }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- 分页导航 -->
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+    <!-- 添加一个插入数据的按钮 -->
+<button id="insert-random-data">插入随机数据</button>
+</body>
+
+
+
+<script>
+    function updateDataList() {
+        $.ajax({
+            url: '/data_break/',  
+            type: 'GET',
+            success: function(data) {
+                // 使用返回的数据更新表格
+                var tableBody = $('tbody');
+                tableBody.empty();  // 清空当前的表格内容
+    
+                // 添加新的数据行到表格
+                data.forEach(function(symbol) {
+                    tableBody.append(
+                        '<tr>' +
+                            '<td>' + symbol.symbol + '</td>' +
+                            '<td>' + symbol.datatime + '</td>' +
+                            '<td>' + symbol.OPrice + '</td>' +
+                            '<td>' + symbol.LPrice + '</td>' +
+                            '<td>' + symbol.HPrice + '</td>' +
+                            '<td>' + symbol.CPrice + '</td>' +
+                        '</tr>'
+                    );
+                });
+            },
+            error: function(error) {
+                console.log(error);
+                alert('更新数据时发生错误。');
+            }
+        });
+    }
+    
+    // 使用jQuery来发送AJAX请求
+    $('#insert-random-data').on('click', function() {
+        $.ajax({
+            url: '/random/',  // 插入随机数据的URL
+            type: 'POST',
+            success: function(response) {
+                // 插入数据成功后，更新数据列表
+                updateDataList();
+            },
+            error: function(error) {
+                console.log(error);
+                alert('插入数据时发生错误。');
+            }
+        });
+    });
+
+</script>
+</html>
